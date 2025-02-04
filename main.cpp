@@ -4,23 +4,23 @@
 
 using namespace std;
 
-vector<vector<int>> trivial_puzzle = {{ 1, 2, 3 }
-                                      { 4, 5, 6 }
+vector<vector<int>> trivial_puzzle = {{ 1, 2, 3 },
+                                      { 4, 5, 6 },
                                       { 7, 8, 0 }};
-vector<vector<int>> very_easy_puzzle = {{ 1, 2, 3 }
-                                        { 4, 5, 6 }
+vector<vector<int>> very_easy_puzzle = {{ 1, 2, 3 },
+                                        { 4, 5, 6 },
                                         { 7, 0, 8 }};
-vector<vector<int>> easy_puzzle = {{ 1, 2, 0 }
-                                   { 4, 5, 3 }
+vector<vector<int>> easy_puzzle = {{ 1, 2, 0 },
+                                   { 4, 5, 3 },
                                    { 7, 8, 6 }};
-vector<vector<int>> doable_puzzle = {{ 0, 1, 2 }
-                                     { 4, 5, 3 }
+vector<vector<int>> doable_puzzle = {{ 0, 1, 2 },
+                                     { 4, 5, 3 },
                                      { 7, 8, 6 }};
-vector<vector<int>> hard_puzzle = {{ 8, 7, 1 }
-                                   { 6, 0, 2 }
+vector<vector<int>> hard_puzzle = {{ 8, 7, 1 },
+                                   { 6, 0, 2 },
                                    { 5, 4, 3 }};
-vector<vector<int>> impossible_puzzle = {{ 8, 6, 7 }
-                                         { 2, 5, 4 }
+vector<vector<int>> impossible_puzzle = {{ 8, 6, 7 },
+                                         { 2, 5, 4 },
                                          { 3, 0, 1 }};
 //Function output puzzle
 
@@ -34,7 +34,7 @@ int main(){
     int difficulty = -1;
     vector<vector<int>> user_puzzle;
     cout << "Welcome to my 8-puzzle solver: Type '1' to use a default 8-puzzle,
-             or type '2' to make a custom 8-puzzle.\n";
+             or type '2' to make a custom 8-puzzle. \n";
     while(puzzle_mode != '1' && puzzle_mode != '2') //checks for valid input
     {
         cin >> puzzle_mode;
@@ -45,11 +45,11 @@ int main(){
         while (difficulty < 0 || difficulty > 5)
         cin >> difficulty;
         if (difficulty == 0){
-            cout << "Trival difficulty selected.\n";
+            cout << "Trival difficulty selected. \n";
             user_puzzle = trivial_puzzle;
         }
         if (difficulty == 1){
-            cout << "Very easy difficulty selected.\n";
+            cout << "Very easy difficulty selected. \n";
             user_puzzle = very_easy_puzzle;
         }   
         if (difficulty == 2){
