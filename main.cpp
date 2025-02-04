@@ -32,6 +32,28 @@ struct Node{ //node structure
         parent = p;
     }
 };
+
+int getMisplacedTileHeuristic(vector<vector<int>> state){
+    int num_misplaced_tiles = 0;
+    for(int i = 0; i < 3; i++){
+        if(state[0][i] != i+1){
+            num_misplaced_tiles++;
+        }
+    }
+    for(int i = 0; i < 3; i++){
+        if(state[1][i] != i+4){
+            num_misplaced_tiles++;
+        }
+    }
+    if(state[2][0] != 7){
+        num_misplaced_tiles++;
+    }
+    if(state[2][1] != 8){
+        num_misplaced_tiles++;
+    }
+    return num_misplaced_tiles;
+}
+
 bool goalTest(vector<vector<int>> state){
     if(state == trivial_puzzle){
         return true;
@@ -70,12 +92,11 @@ void expandQueue(queue<Node*>& nodes){
         nodes.push(child_2);
     }
     else if(state[0][1] == 0){ //upper middle edge
-        //blank can move left, down, or right
         //moving blank space left
         temp = state[0][0]; 
         vector<vector<int>> next_state_1 = state;
         next_state_1[0][1] = temp;
-        next_state_1[1][0] = 0;
+        next_state_1[0][0] = 0;
         Node* child_1 = new Node(next_state_1, nodes.front());
         nodes.push(child_1);
         //moving blank space down
@@ -94,25 +115,152 @@ void expandQueue(queue<Node*>& nodes){
         nodes.push(child_3);
     }
     else if(state[0][2] == 0){ //upper right corner
-        //blank can move left or down
+        //moving blank space left
+        temp = state[0][1]; 
+        vector<vector<int>> next_state_1 = state;
+        next_state_1[0][2] = temp;
+        next_state_1[0][1] = 0;
+        Node* child_1 = new Node(next_state_1, nodes.front());
+        nodes.push(child_1);
+        //moving blank space down
+        temp = state[1][2]; 
+        vector<vector<int>> next_state_2 = state;
+        next_state_2[0][2] = temp;
+        next_state_2[1][2] = 0;
+        Node* child_2 = new Node(next_state_2, nodes.front());
+        nodes.push(child_2);
     }
     else if(state[1][0] == 0){ //middle left edge
-        //blank can move up, down, or right
+        //moving blank space up
+        temp = state[0][0]; 
+        vector<vector<int>> next_state_1 = state;
+        next_state_1[1][0] = temp;
+        next_state_1[0][0] = 0;
+        Node* child_1 = new Node(next_state_1, nodes.front());
+        nodes.push(child_1);
+        //moving blank space down
+        temp = state[2][0]; 
+        vector<vector<int>> next_state_2 = state;
+        next_state_2[1][0] = temp;
+        next_state_2[2][0] = 0;
+        Node* child_2 = new Node(next_state_2, nodes.front());
+        nodes.push(child_2);
+        //moving blank space right
+        temp = state[1][1]; 
+        vector<vector<int>> next_state_3 = state;
+        next_state_3[1][0] = temp;
+        next_state_3[1][1] = 0;
+        Node* child_3 = new Node(next_state_3, nodes.front());
+        nodes.push(child_3);
     }
     else if(state[1][1] == 0){ //center
-        //blank can move in any of the four directions
+        //moving blank space up
+        temp = state[0][1]; 
+        vector<vector<int>> next_state_1 = state;
+        next_state_1[1][1] = temp;
+        next_state_1[0][1] = 0;
+        Node* child_1 = new Node(next_state_1, nodes.front());
+        nodes.push(child_1);
+        //moving blank space down
+        temp = state[2][1]; 
+        vector<vector<int>> next_state_2 = state;
+        next_state_2[1][1] = temp;
+        next_state_2[2][1] = 0;
+        Node* child_2 = new Node(next_state_2, nodes.front());
+        nodes.push(child_2);
+        //moving blank space right
+        temp = state[1][2]; 
+        vector<vector<int>> next_state_3 = state;
+        next_state_3[1][1] = temp;
+        next_state_3[1][2] = 0;
+        Node* child_3 = new Node(next_state_3, nodes.front());
+        nodes.push(child_3);
+        //moving blank space left
+        temp = state[1][0]; 
+        vector<vector<int>> next_state_4 = state;
+        next_state_4[1][1] = temp;
+        next_state_4[1][0] = 0;
+        Node* child_4 = new Node(next_state_4, nodes.front());
+        nodes.push(child_4);
     }
     else if(state[1][2] == 0){ // middle right edge
-        //blank can move up, down, or left
+        //moving blank space up
+        temp = state[0][2]; 
+        vector<vector<int>> next_state_1 = state;
+        next_state_1[1][2] = temp;
+        next_state_1[0][2] = 0;
+        Node* child_1 = new Node(next_state_1, nodes.front());
+        nodes.push(child_1);
+        //moving blank space down
+        temp = state[2][2]; 
+        vector<vector<int>> next_state_2 = state;
+        next_state_2[1][2] = temp;
+        next_state_2[2][2] = 0;
+        Node* child_2 = new Node(next_state_2, nodes.front());
+        nodes.push(child_2);
+        //moving blank space left
+        temp = state[1][1]; 
+        vector<vector<int>> next_state_3 = state;
+        next_state_3[1][2] = temp;
+        next_state_3[1][1] = 0;
+        Node* child_3 = new Node(next_state_3, nodes.front());
+        nodes.push(child_3);
     }
     else if(state[2][0] == 0){ //bottom left edge
-        //blank can move up or right
+        //moving blank space up
+        temp = state[1][0]; 
+        vector<vector<int>> next_state_1 = state;
+        next_state_1[2][0] = temp;
+        next_state_1[1][0] = 0;
+        Node* child_1 = new Node(next_state_1, nodes.front());
+        nodes.push(child_1);
+        //moving blank space right
+        temp = state[2][1]; 
+        vector<vector<int>> next_state_2 = state;
+        next_state_2[2][0] = temp;
+        next_state_2[2][1] = 0;
+        Node* child_2 = new Node(next_state_2, nodes.front());
+        nodes.push(child_2);
     }
     else if(state[2][1] == 0){ //bottom center edge
-        //blank can move left, up, or right
+        //moving blank space up
+        temp = state[1][1]; 
+        vector<vector<int>> next_state_1 = state;
+        next_state_1[2][1] = temp;
+        next_state_1[1][1] = 0;
+        Node* child_1 = new Node(next_state_1, nodes.front());
+        nodes.push(child_1);
+        //moving blank space left
+        temp = state[2][0]; 
+        vector<vector<int>> next_state_2 = state;
+        next_state_2[2][1] = temp;
+        next_state_2[2][0] = 0;
+        Node* child_2 = new Node(next_state_2, nodes.front());
+        nodes.push(child_2);
+        //moving blank space right
+        temp = state[2][2]; 
+        vector<vector<int>> next_state_3 = state;
+        next_state_3[2][1] = temp;
+        next_state_3[2][2] = 0;
+        Node* child_3 = new Node(next_state_3, nodes.front());
+        nodes.push(child_3);
     }
     else if(state[2][2] == 0){ //bottom right edge
         //blank can move left or up
+        //moving blank space left
+        temp = state[2][1]; 
+        vector<vector<int>> next_state_1 = state;
+        next_state_1[2][2] = temp;
+        next_state_1[2][1] = 0;
+        Node* child_1 = new Node(next_state_1, nodes.front());
+        nodes.push(child_1);
+        //moving blank space up
+        temp = state[1][2]; 
+        vector<vector<int>> next_state_2 = state;
+        next_state_2[2][2] = temp;
+        next_state_2[1][2] = 0;
+        Node* child_2 = new Node(next_state_2, nodes.front());
+        nodes.push(child_2);
     }
     
 }
@@ -124,20 +272,17 @@ Node* SearchAlgorithm(vector<vector<int>> puzzle, int algorithmType){
     nodes.push(root);
     Node* goal_node = nullptr;
     
-    while(goal_node == nullptr){
-        if(nodes.empty()){
-            return nullptr;
-        }
+    while(!nodes.empty()){
         Node* front = nodes.front();
         if(goalTest(nodes.front()->state)){
             goal_node = nodes.front();
+            printPuzzle(goal_node->state);
             return goal_node;
         }
         expandQueue(nodes);
         nodes.pop();
-        
     }
-    return goal_node;
+    return nullptr;
 }
 
 int main(){
@@ -183,9 +328,7 @@ int main(){
             user_puzzle = impossible_puzzle;
         }
     }
-    
     else if(puzzle_mode == 2){ /////////////////////////////////////////// CREATE CUSTOM PUZZLE
-        string row_input;
         cout << "Enter your puzzle, using a zero to represent the blank. Please only enter valid 8-puzzles.\n";
         cout << "Enter the first row (separated by spaces and use 0 to represent the blank space), then hit enter\n";
         for(int i = 0; i < 3; i++){
@@ -220,6 +363,5 @@ int main(){
     else if(temp == 3){ //Manhattan Distance Heuristic
         goal_state_node = SearchAlgorithm(user_puzzle, 2);
     }
-    printPuzzle(goal_state_node->state);
     return 0;
 }
