@@ -54,14 +54,15 @@ void expandQueue(queue<Node*>& nodes){
     int temp;
     vector<vector<int>> state = nodes.front()->state;
     if(state[0][0] == 0){   //upper right corner
-        temp = state[1][0]; //move blank spacedown
+        //moving blank space down
+        temp = state[1][0]; 
         vector<vector<int>> next_state_1 = state;
         next_state_1[0][0] = temp;
         next_state_1[1][0] = 0;
         Node* child_1 = new Node(next_state_1, nodes.front());
         nodes.push(child_1);
-        
-        temp = state[0][1]; //move blank space right
+        //moving blank space right
+        temp = state[0][1]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[0][0] = temp;
         next_state_2[0][1] = 0;
@@ -70,6 +71,27 @@ void expandQueue(queue<Node*>& nodes){
     }
     else if(state[0][1] == 0){ //upper middle edge
         //blank can move left, down, or right
+        //moving blank space left
+        temp = state[0][0]; 
+        vector<vector<int>> next_state_1 = state;
+        next_state_1[0][1] = temp;
+        next_state_1[1][0] = 0;
+        Node* child_1 = new Node(next_state_1, nodes.front());
+        nodes.push(child_1);
+        //moving blank space down
+        temp = state[1][1]; 
+        vector<vector<int>> next_state_2 = state;
+        next_state_2[0][1] = temp;
+        next_state_2[1][1] = 0;
+        Node* child_2 = new Node(next_state_2, nodes.front());
+        nodes.push(child_2);
+        //moving blank space right
+        temp = state[0][2]; 
+        vector<vector<int>> next_state_3 = state;
+        next_state_3[0][1] = temp;
+        next_state_3[0][2] = 0;
+        Node* child_3 = new Node(next_state_3, nodes.front());
+        nodes.push(child_3);
     }
     else if(state[0][2] == 0){ //upper right corner
         //blank can move left or down
@@ -96,7 +118,7 @@ void expandQueue(queue<Node*>& nodes){
 }
 
 //Function uniform cost search (same for all 3 types of searches)
-Node* SearchAlgorithm(vector<vector<int>> puzzle, int type){
+Node* SearchAlgorithm(vector<vector<int>> puzzle, int algorithmType){
     queue<Node*> nodes;
     Node* root = new Node(puzzle, nullptr);
     nodes.push(root);
@@ -160,7 +182,6 @@ int main(){
             cout << "Trival difficulty selected.\n";
             user_puzzle = impossible_puzzle;
         }
-        //printPuzzle(user_puzzle);
     }
     
     else if(puzzle_mode == 2){ /////////////////////////////////////////// CREATE CUSTOM PUZZLE
@@ -182,7 +203,6 @@ int main(){
             user_puzzle[2][i] = temp;
         }
         cout << endl;
-        //printPuzzle(user_puzzle);
     }
     ///////////////////////////////////////////////////PICKING ALGORITHM
     temp = -1;
@@ -190,14 +210,16 @@ int main(){
         cout << "Select algorithm. (1) for Uniform Cost Search, (2) for the Misplaced Tile Heuristic, or (3) the Manhattan Distance Heuristic.\n";
         cin >> temp;
     }
+    Node* goal_state_node = nullptr;
     if(temp == 1){ //Uniform Cost Search
-
+        goal_state_node = SearchAlgorithm(user_puzzle, 0);
     }
     else if(temp == 2){ //Misplaced Tile Heuristic
-        
+        goal_state_node = SearchAlgorithm(user_puzzle, 1);
     }
     else if(temp == 3){ //Manhattan Distance Heuristic
-
+        goal_state_node = SearchAlgorithm(user_puzzle, 2);
     }
+    printPuzzle(goal_state_node->state);
     return 0;
 }
