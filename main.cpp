@@ -2,6 +2,7 @@
 #include <sstream>
 #include <vector>
 #include <queue>
+#include <algorithm>
 
 using namespace std;
 
@@ -27,13 +28,25 @@ vector<vector<int>> impossible_puzzle = {{ 8, 6, 7 },
 struct Node{ //node structure
     vector<vector<int>> state; //current state of the puzzle
     Node* parent;//previous state of the puzzle
-    Node(const vector<vector<int>>& s, Node* p = nullptr){//Node Constructor
+    int depth;
+    Node(const vector<vector<int>>& s){//Node Constructor
+        state = s;
+        parent = nullptr;
+        depth = 0;
+    }
+    Node(const vector<vector<int>>& s, Node* p){//Node Constructor
         state = s;
         parent = p;
+        depth = 0;
+    }
+    Node(const vector<vector<int>>& s, Node* p, int depth_){//Node Constructor
+        state = s;
+        parent = p;
+        depth = depth_;
     }
 };
 
-int getMisplacedTileHeuristic(vector<vector<int>> state){
+int getMisplacedTiles(vector<vector<int>> state){
     int num_misplaced_tiles = 0;
     for(int i = 0; i < 3; i++){
         if(state[0][i] != i+1){
@@ -72,24 +85,40 @@ void printPuzzle(vector<vector<int>> puzzle){//Prints the puzzle
         }
 }
 
-void expandQueue(queue<Node*>& nodes){
+void expandQueue(queue<Node*>& nodes, int algorithmType){
     int temp;
     vector<vector<int>> state = nodes.front()->state;
-    if(state[0][0] == 0){   //blank in upper right corner
+    if(state[0][0] == 0){   //blank in upper left corner
         //moving blank space down
         temp = state[1][0]; 
         vector<vector<int>> next_state_1 = state;
         next_state_1[0][0] = temp;
         next_state_1[1][0] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front());
-        nodes.push(child_1);
+        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
         //moving blank space right
         temp = state[0][1]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[0][0] = temp;
         next_state_2[0][1] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front());
-        nodes.push(child_2);
+        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1); 
+        switch (algorithmType){
+            case 1: // Uniform Cost Search (Uninformed)
+                nodes.push(child_1);
+                nodes.push(child_2);
+                break;
+            case 2: // Misplaced Tile Heuristic
+                if(getMisplacedTiles(child_1->state) < getMisplacedTiles(child_2->state)){
+                    nodes.push(child_1);
+                    nodes.push(child_2);
+                }
+                else{
+                    nodes.push(child_2);
+                    nodes.push(child_1);
+                }
+                break;
+            case 3: // Manhattan Distance Heuristic
+                break;
+        }
     }
     else if(state[0][1] == 0){ //blank in upper middle edge
         //moving blank space left
@@ -97,22 +126,47 @@ void expandQueue(queue<Node*>& nodes){
         vector<vector<int>> next_state_1 = state;
         next_state_1[0][1] = temp;
         next_state_1[0][0] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front());
-        nodes.push(child_1);
+        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
         //moving blank space down
         temp = state[1][1]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[0][1] = temp;
         next_state_2[1][1] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front());
-        nodes.push(child_2);
+        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
         //moving blank space right
         temp = state[0][2]; 
         vector<vector<int>> next_state_3 = state;
         next_state_3[0][1] = temp;
         next_state_3[0][2] = 0;
-        Node* child_3 = new Node(next_state_3, nodes.front());
-        nodes.push(child_3);
+        Node* child_3 = new Node(next_state_3, nodes.front(), nodes.front()->depth + 1);
+        switch (algorithmType){
+            case 1: // Uniform Cost Search (Uninformed)
+                nodes.push(child_1);
+                nodes.push(child_2);
+                nodes.push(child_3);
+                break;
+            case 2: // Misplaced Tile Heuristic
+                //Node* best_node = nullptr;
+                int heuristics[3];
+                heuristics[0] = getMisplacedTiles(child_1->state);
+                heuristics[1] = getMisplacedTiles(child_2->state);
+                heuristics[2] = getMisplacedTiles(child_3->state);
+                sort(heuristics, heuristics + 3);
+                for(int i = 0; i < 3; i++){
+                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
+                        nodes.push(child_1);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
+                        nodes.push(child_2);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_3->state)){
+                        nodes.push(child_3);
+                    }
+                }    
+                break;
+            case 3: // Manhattan Distance Heuristic
+                break;
+        }
     }
     else if(state[0][2] == 0){ //blank in upper right corner
         //moving blank space left
@@ -120,15 +174,36 @@ void expandQueue(queue<Node*>& nodes){
         vector<vector<int>> next_state_1 = state;
         next_state_1[0][2] = temp;
         next_state_1[0][1] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front());
-        nodes.push(child_1);
+        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
         //moving blank space down
         temp = state[1][2]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[0][2] = temp;
         next_state_2[1][2] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front());
-        nodes.push(child_2);
+        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
+        switch (algorithmType){
+            case 1: // Uniform Cost Search (Uninformed)
+                nodes.push(child_1);
+                nodes.push(child_2);
+                break;
+            case 2: // Misplaced Tile Heuristic
+                //Node* best_node = nullptr;
+                int heuristics[2];
+                heuristics[0] = getMisplacedTiles(child_1->state);
+                heuristics[1] = getMisplacedTiles(child_2->state);
+                sort(heuristics, heuristics + 2);
+                for(int i = 0; i < 2; i++){
+                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
+                        nodes.push(child_1);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
+                        nodes.push(child_2);
+                    }
+                }    
+                break;
+            case 3: // Manhattan Distance Heuristic
+                break;
+        }
     }
     else if(state[1][0] == 0){ //blank in middle left edge
         //moving blank space up
@@ -136,22 +211,46 @@ void expandQueue(queue<Node*>& nodes){
         vector<vector<int>> next_state_1 = state;
         next_state_1[1][0] = temp;
         next_state_1[0][0] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front());
-        nodes.push(child_1);
+        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
         //moving blank space down
         temp = state[2][0]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[1][0] = temp;
         next_state_2[2][0] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front());
-        nodes.push(child_2);
+        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
         //moving blank space right
         temp = state[1][1]; 
         vector<vector<int>> next_state_3 = state;
         next_state_3[1][0] = temp;
         next_state_3[1][1] = 0;
-        Node* child_3 = new Node(next_state_3, nodes.front());
-        nodes.push(child_3);
+        Node* child_3 = new Node(next_state_3, nodes.front(), nodes.front()->depth + 1);
+        switch (algorithmType){
+            case 1: // Uniform Cost Search (Uninformed)
+                nodes.push(child_1);
+                nodes.push(child_2);
+                nodes.push(child_3);
+                break;
+            case 2: // Misplaced Tile Heuristic
+                int heuristics[3];
+                heuristics[0] = getMisplacedTiles(child_1->state);
+                heuristics[1] = getMisplacedTiles(child_2->state);
+                heuristics[2] = getMisplacedTiles(child_3->state);
+                sort(heuristics, heuristics + 3);
+                for(int i = 0; i < 3; i++){
+                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
+                        nodes.push(child_1);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
+                        nodes.push(child_2);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_3->state)){
+                        nodes.push(child_3);
+                    }
+                }    
+                break;
+            case 3: // Manhattan Distance Heuristic
+                break;
+        }
     }
     else if(state[1][1] == 0){ //blank in center
         //moving blank space up
@@ -159,29 +258,58 @@ void expandQueue(queue<Node*>& nodes){
         vector<vector<int>> next_state_1 = state;
         next_state_1[1][1] = temp;
         next_state_1[0][1] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front());
-        nodes.push(child_1);
+        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
         //moving blank space down
         temp = state[2][1]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[1][1] = temp;
         next_state_2[2][1] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front());
-        nodes.push(child_2);
+        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
         //moving blank space right
         temp = state[1][2]; 
         vector<vector<int>> next_state_3 = state;
         next_state_3[1][1] = temp;
         next_state_3[1][2] = 0;
-        Node* child_3 = new Node(next_state_3, nodes.front());
-        nodes.push(child_3);
+        Node* child_3 = new Node(next_state_3, nodes.front(), nodes.front()->depth + 1);
         //moving blank space left
         temp = state[1][0]; 
         vector<vector<int>> next_state_4 = state;
         next_state_4[1][1] = temp;
         next_state_4[1][0] = 0;
-        Node* child_4 = new Node(next_state_4, nodes.front());
-        nodes.push(child_4);
+        Node* child_4 = new Node(next_state_4, nodes.front(), nodes.front()->depth + 1);
+        switch (algorithmType){
+            case 1: // Uniform Cost Search (Uninformed)
+                nodes.push(child_1);
+                nodes.push(child_2);
+                nodes.push(child_3);
+                nodes.push(child_4);
+                break;
+            case 2: // Misplaced Tile Heuristic
+                //Node* best_node = nullptr;
+                int heuristics[4];
+                heuristics[0] = getMisplacedTiles(child_1->state);
+                heuristics[1] = getMisplacedTiles(child_2->state);
+                heuristics[2] = getMisplacedTiles(child_3->state);
+                heuristics[3] = getMisplacedTiles(child_4->state);
+                sort(heuristics, heuristics + 4);
+                for(int i = 0; i < 4; i++){
+                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
+                        nodes.push(child_1);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
+                        nodes.push(child_2);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_3->state)){
+                        nodes.push(child_3);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_4->state)){
+                        nodes.push(child_4);
+                    }
+                }    
+                break;
+            case 3: // Manhattan Distance Heuristic
+                break;
+        }
     }
     else if(state[1][2] == 0){ // blank in middle right edge
         //moving blank space up
@@ -189,22 +317,47 @@ void expandQueue(queue<Node*>& nodes){
         vector<vector<int>> next_state_1 = state;
         next_state_1[1][2] = temp;
         next_state_1[0][2] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front());
-        nodes.push(child_1);
+        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
         //moving blank space down
         temp = state[2][2]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[1][2] = temp;
         next_state_2[2][2] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front());
-        nodes.push(child_2);
+        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
         //moving blank space left
         temp = state[1][1]; 
         vector<vector<int>> next_state_3 = state;
         next_state_3[1][2] = temp;
         next_state_3[1][1] = 0;
-        Node* child_3 = new Node(next_state_3, nodes.front());
-        nodes.push(child_3);
+        Node* child_3 = new Node(next_state_3, nodes.front(), nodes.front()->depth + 1);
+        switch (algorithmType){
+            case 1: // Uniform Cost Search (Uninformed)
+                nodes.push(child_1);
+                nodes.push(child_2);
+                nodes.push(child_3);
+                break;
+            case 2: // Misplaced Tile Heuristic
+                //Node* best_node = nullptr;
+                int heuristics[3];
+                heuristics[0] = getMisplacedTiles(child_1->state);
+                heuristics[1] = getMisplacedTiles(child_2->state);
+                heuristics[2] = getMisplacedTiles(child_3->state);
+                sort(heuristics, heuristics + 3);
+                for(int i = 0; i < 3; i++){
+                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
+                        nodes.push(child_1);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
+                        nodes.push(child_2);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_3->state)){
+                        nodes.push(child_3);
+                    }
+                }    
+                break;
+            case 3: // Manhattan Distance Heuristic
+                break;
+        }
     }
     else if(state[2][0] == 0){ //blank in bottom left edge
         //moving blank space up
@@ -212,15 +365,36 @@ void expandQueue(queue<Node*>& nodes){
         vector<vector<int>> next_state_1 = state;
         next_state_1[2][0] = temp;
         next_state_1[1][0] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front());
-        nodes.push(child_1);
+        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
         //moving blank space right
         temp = state[2][1]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[2][0] = temp;
         next_state_2[2][1] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front());
-        nodes.push(child_2);
+        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
+        switch (algorithmType){
+            case 1: // Uniform Cost Search (Uninformed)
+                nodes.push(child_1);
+                nodes.push(child_2);
+                break;
+            case 2: // Misplaced Tile Heuristic
+                //Node* best_node = nullptr;
+                int heuristics[2];
+                heuristics[0] = getMisplacedTiles(child_1->state);
+                heuristics[1] = getMisplacedTiles(child_2->state);
+                sort(heuristics, heuristics + 2);
+                for(int i = 0; i < 2; i++){
+                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
+                        nodes.push(child_1);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
+                        nodes.push(child_2);
+                    }
+                }    
+                break;
+            case 3: // Manhattan Distance Heuristic
+                break;
+        }
     }
     else if(state[2][1] == 0){ //blank in bottom center edge
         //moving blank space up
@@ -228,39 +402,84 @@ void expandQueue(queue<Node*>& nodes){
         vector<vector<int>> next_state_1 = state;
         next_state_1[2][1] = temp;
         next_state_1[1][1] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front());
-        nodes.push(child_1);
+        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
         //moving blank space left
         temp = state[2][0]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[2][1] = temp;
         next_state_2[2][0] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front());
-        nodes.push(child_2);
+        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
         //moving blank space right
         temp = state[2][2]; 
         vector<vector<int>> next_state_3 = state;
         next_state_3[2][1] = temp;
         next_state_3[2][2] = 0;
-        Node* child_3 = new Node(next_state_3, nodes.front());
-        nodes.push(child_3);
+        Node* child_3 = new Node(next_state_3, nodes.front(), nodes.front()->depth + 1);
+        switch (algorithmType){
+            case 1: // Uniform Cost Search (Uninformed)
+                nodes.push(child_1);
+                nodes.push(child_2);
+                nodes.push(child_3);
+                break;
+            case 2: // Misplaced Tile Heuristic
+                //Node* best_node = nullptr;
+                int heuristics[3];
+                heuristics[0] = getMisplacedTiles(child_1->state);
+                heuristics[1] = getMisplacedTiles(child_2->state);
+                heuristics[2] = getMisplacedTiles(child_3->state);
+                sort(heuristics, heuristics + 3);
+                for(int i = 0; i < 3; i++){
+                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
+                        nodes.push(child_1);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
+                        nodes.push(child_2);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_3->state)){
+                        nodes.push(child_3);
+                    }
+                }    
+                break;
+            case 3: // Manhattan Distance Heuristic
+                break;
+        }
     }
     else if(state[2][2] == 0){ //blank in bottom right edge
-        //blank can move left or up
         //moving blank space left
         temp = state[2][1]; 
         vector<vector<int>> next_state_1 = state;
         next_state_1[2][2] = temp;
         next_state_1[2][1] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front());
-        nodes.push(child_1);
+        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
         //moving blank space up
         temp = state[1][2]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[2][2] = temp;
         next_state_2[1][2] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front());
-        nodes.push(child_2);
+        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
+        switch (algorithmType){
+            case 1: // Uniform Cost Search (Uninformed)
+                nodes.push(child_1);
+                nodes.push(child_2);
+                break;
+            case 2: // Misplaced Tile Heuristic
+                //Node* best_node = nullptr;
+                int heuristics[2];
+                heuristics[0] = getMisplacedTiles(child_1->state);
+                heuristics[1] = getMisplacedTiles(child_2->state);
+                sort(heuristics, heuristics + 2);
+                for(int i = 0; i < 2; i++){
+                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
+                        nodes.push(child_1);
+                    }
+                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
+                        nodes.push(child_2);
+                    }
+                }    
+                break;
+            case 3: // Manhattan Distance Heuristic
+                break;
+        }
     }
     
 }
@@ -268,7 +487,7 @@ void expandQueue(queue<Node*>& nodes){
 //Function uniform cost search (same for all 3 types of searches)
 Node* SearchAlgorithm(vector<vector<int>> puzzle, int algorithmType){
     queue<Node*> nodes;
-    Node* root = new Node(puzzle, nullptr);
+    Node* root = new Node(puzzle);
     nodes.push(root);
     Node* goal_node = nullptr;
     
@@ -277,9 +496,10 @@ Node* SearchAlgorithm(vector<vector<int>> puzzle, int algorithmType){
         if(goalTest(nodes.front()->state)){
             goal_node = nodes.front();
             printPuzzle(goal_node->state);
+            cout << "Solution Depth: " << goal_node->depth;
             return goal_node;
         }
-        expandQueue(nodes);
+        expandQueue(nodes, algorithmType);
         nodes.pop();
     }
     return nullptr;
