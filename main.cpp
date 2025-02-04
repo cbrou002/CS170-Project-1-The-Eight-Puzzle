@@ -27,11 +27,19 @@ vector<vector<int>> impossible_puzzle = {{ 8, 6, 7 },
 struct Node{ //node structure
     vector<vector<int>> state; //current state of the puzzle
     vector<vector<int>>* parent;//previous state of the puzzle
-    Node(const vector<vector<int>>& s, Node* p = nullptr){//Node Constructor
+    Node(const vector<vector<int>>& s){//Node Constructor
         state = s;
-        parent = p;
+        parent = nullptr;
     }
 };
+bool goalTest(vector<vector<int>> state){
+    if(state == trivial_puzzle){
+        return true;
+    }
+    else{
+        return false;
+    }
+}
 
 void printPuzzle(vector<vector<int>> puzzle){//Prints the puzzle
     for(int i = 0; i < 3; i++){
@@ -43,6 +51,24 @@ void printPuzzle(vector<vector<int>> puzzle){//Prints the puzzle
 }
 
 //Function uniform cost search (same for all 3 types of searches)
+Node* SearchAlgorithm(vector<vector<int>> puzzle, int type){
+    queue<Node*> nodes;
+    Node* root = new Node(puzzle);
+    nodes.push(root);
+    Node* goal_node = nullptr;
+    while(true){
+        if(nodes.empty()){
+            return nullptr;
+        }
+        if(goalTest(nodes.front()->state)){
+            goal_node = nodes.front();
+            return goal_node;
+        }
+        nodes.pop();
+
+    }
+    return nullptr;
+}
 
 int main(){
     //input 1 for default puzzle and 2 for custom puzzle
