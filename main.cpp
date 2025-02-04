@@ -75,7 +75,7 @@ void printPuzzle(vector<vector<int>> puzzle){//Prints the puzzle
 void expandQueue(queue<Node*>& nodes){
     int temp;
     vector<vector<int>> state = nodes.front()->state;
-    if(state[0][0] == 0){   //upper right corner
+    if(state[0][0] == 0){   //blank in upper right corner
         //moving blank space down
         temp = state[1][0]; 
         vector<vector<int>> next_state_1 = state;
@@ -91,7 +91,7 @@ void expandQueue(queue<Node*>& nodes){
         Node* child_2 = new Node(next_state_2, nodes.front());
         nodes.push(child_2);
     }
-    else if(state[0][1] == 0){ //upper middle edge
+    else if(state[0][1] == 0){ //blank in upper middle edge
         //moving blank space left
         temp = state[0][0]; 
         vector<vector<int>> next_state_1 = state;
@@ -114,7 +114,7 @@ void expandQueue(queue<Node*>& nodes){
         Node* child_3 = new Node(next_state_3, nodes.front());
         nodes.push(child_3);
     }
-    else if(state[0][2] == 0){ //upper right corner
+    else if(state[0][2] == 0){ //blank in upper right corner
         //moving blank space left
         temp = state[0][1]; 
         vector<vector<int>> next_state_1 = state;
@@ -130,7 +130,7 @@ void expandQueue(queue<Node*>& nodes){
         Node* child_2 = new Node(next_state_2, nodes.front());
         nodes.push(child_2);
     }
-    else if(state[1][0] == 0){ //middle left edge
+    else if(state[1][0] == 0){ //blank in middle left edge
         //moving blank space up
         temp = state[0][0]; 
         vector<vector<int>> next_state_1 = state;
@@ -153,7 +153,7 @@ void expandQueue(queue<Node*>& nodes){
         Node* child_3 = new Node(next_state_3, nodes.front());
         nodes.push(child_3);
     }
-    else if(state[1][1] == 0){ //center
+    else if(state[1][1] == 0){ //blank in center
         //moving blank space up
         temp = state[0][1]; 
         vector<vector<int>> next_state_1 = state;
@@ -183,7 +183,7 @@ void expandQueue(queue<Node*>& nodes){
         Node* child_4 = new Node(next_state_4, nodes.front());
         nodes.push(child_4);
     }
-    else if(state[1][2] == 0){ // middle right edge
+    else if(state[1][2] == 0){ // blank in middle right edge
         //moving blank space up
         temp = state[0][2]; 
         vector<vector<int>> next_state_1 = state;
@@ -206,7 +206,7 @@ void expandQueue(queue<Node*>& nodes){
         Node* child_3 = new Node(next_state_3, nodes.front());
         nodes.push(child_3);
     }
-    else if(state[2][0] == 0){ //bottom left edge
+    else if(state[2][0] == 0){ //blank in bottom left edge
         //moving blank space up
         temp = state[1][0]; 
         vector<vector<int>> next_state_1 = state;
@@ -222,7 +222,7 @@ void expandQueue(queue<Node*>& nodes){
         Node* child_2 = new Node(next_state_2, nodes.front());
         nodes.push(child_2);
     }
-    else if(state[2][1] == 0){ //bottom center edge
+    else if(state[2][1] == 0){ //blank in bottom center edge
         //moving blank space up
         temp = state[1][1]; 
         vector<vector<int>> next_state_1 = state;
@@ -245,7 +245,7 @@ void expandQueue(queue<Node*>& nodes){
         Node* child_3 = new Node(next_state_3, nodes.front());
         nodes.push(child_3);
     }
-    else if(state[2][2] == 0){ //bottom right edge
+    else if(state[2][2] == 0){ //blank in bottom right edge
         //blank can move left or up
         //moving blank space left
         temp = state[2][1]; 
