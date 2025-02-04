@@ -26,10 +26,10 @@ vector<vector<int>> impossible_puzzle = {{ 8, 6, 7 },
 
 struct Node{ //node structure
     vector<vector<int>> state; //current state of the puzzle
-    vector<vector<int>>* parent;//previous state of the puzzle
-    Node(const vector<vector<int>>& s){//Node Constructor
+    Node* parent;//previous state of the puzzle
+    Node(const vector<vector<int>>& s, Node* p = nullptr){//Node Constructor
         state = s;
-        parent = nullptr;
+        parent = p;
     }
 };
 bool goalTest(vector<vector<int>> state){
@@ -50,24 +50,72 @@ void printPuzzle(vector<vector<int>> puzzle){//Prints the puzzle
         }
 }
 
+void expandQueue(queue<Node*>& nodes){
+    int temp;
+    vector<vector<int>> state = nodes.front()->state;
+    if(state[0][0] == 0){   //upper right corner
+        temp = state[1][0]; //move blank spacedown
+        vector<vector<int>> next_state_1 = state;
+        next_state_1[0][0] = temp;
+        next_state_1[1][0] = 0;
+        Node* child_1 = new Node(next_state_1, nodes.front());
+        nodes.push(child_1);
+        
+        temp = state[0][1]; //move blank space right
+        vector<vector<int>> next_state_2 = state;
+        next_state_2[0][0] = temp;
+        next_state_2[0][1] = 0;
+        Node* child_2 = new Node(next_state_2, nodes.front());
+        nodes.push(child_2);
+    }
+    else if(state[0][1] == 0){ //upper middle edge
+        //blank can move left, down, or right
+    }
+    else if(state[0][2] == 0){ //upper right corner
+        //blank can move left or down
+    }
+    else if(state[1][0] == 0){ //middle left edge
+        //blank can move up, down, or right
+    }
+    else if(state[1][1] == 0){ //center
+        //blank can move in any of the four directions
+    }
+    else if(state[1][2] == 0){ // middle right edge
+        //blank can move up, down, or left
+    }
+    else if(state[2][0] == 0){ //bottom left edge
+        //blank can move up or right
+    }
+    else if(state[2][1] == 0){ //bottom center edge
+        //blank can move left, up, or right
+    }
+    else if(state[2][2] == 0){ //bottom right edge
+        //blank can move left or up
+    }
+    
+}
+
 //Function uniform cost search (same for all 3 types of searches)
 Node* SearchAlgorithm(vector<vector<int>> puzzle, int type){
     queue<Node*> nodes;
-    Node* root = new Node(puzzle);
+    Node* root = new Node(puzzle, nullptr);
     nodes.push(root);
     Node* goal_node = nullptr;
-    while(true){
+    
+    while(goal_node == nullptr){
         if(nodes.empty()){
             return nullptr;
         }
+        Node* front = nodes.front();
         if(goalTest(nodes.front()->state)){
             goal_node = nodes.front();
             return goal_node;
         }
+        expandQueue(nodes);
         nodes.pop();
-
+        
     }
-    return nullptr;
+    return goal_node;
 }
 
 int main(){
