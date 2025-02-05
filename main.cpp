@@ -24,13 +24,13 @@ vector<vector<int>> depth_12_puzzle = {{ 1, 3, 6 },//depth 12 puzzle
 vector<vector<int>> depth_16_puzzle = {{ 1, 6, 7 },//depth 16 puzzle
                                         { 5, 0, 3 },
                                         { 4, 8, 2 }};
-vector<vector<int>> depth_20_puzzle = {{ 7, 1, 2 },//depth 20 puzzle added
+vector<vector<int>> depth_20_puzzle = {{ 7, 1, 2 },//depth 20 puzzle 
                                         { 4, 8, 5 },
                                         { 6, 3, 0 }};                                                                
-vector<vector<int>> depth_31_puzzle_1 = {{ 8, 6, 7 },//depth 31
+vector<vector<int>> depth_31_puzzle_1 = {{ 8, 6, 7 },//depth 31 puzzle
                                          { 2, 5, 4 },
                                          { 3, 0, 1 }};
-vector<vector<int>> depth_31_puzzle_2 = {{ 6, 4, 7 },//depth 31 added
+vector<vector<int>> depth_31_puzzle_2 = {{ 6, 4, 7 },//depth 31 puzzle added
                                          { 8, 5, 0 },
                                          { 3, 2, 1 }};
 
@@ -245,7 +245,7 @@ int main(){
     int difficulty = -1;
     if(puzzle_mode == 1){ /////////////////////////////////////////////// CREATE DEFAULT PUZZLE
         cout << "You wish to use a default puzzle. "; 
-        while (difficulty < 0 || difficulty > 6){//checks for valid input
+        while (difficulty < 0 || difficulty > 8){//checks for valid input
             cout << "Please enter a desired difficulty on a scale from 0 to 6.\n";
             cin >> difficulty;
         }
@@ -274,8 +274,16 @@ int main(){
             user_puzzle = depth_16_puzzle;
         }  
         if(difficulty == 6){
-            cout << "Impossible difficulty selected.\n";
+            cout << "Depth 20 puzzle selected.\n";
+            user_puzzle = depth_20_puzzle;
+        }
+        if(difficulty == 7){
+            cout << "Depth 31 option 1 selected.\n";
             user_puzzle = depth_31_puzzle_1;
+        }
+        if(difficulty == 8){
+            cout << "Depth 31 puzzle option 2  selected.\n";
+            user_puzzle = depth_31_puzzle_2;
         }
         cout << "Your default puzzle:\n";
         printPuzzle(user_puzzle);
