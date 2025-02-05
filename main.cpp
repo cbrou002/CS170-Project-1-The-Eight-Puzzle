@@ -26,7 +26,10 @@ vector<vector<int>> depth_16_puzzle = {{ 1, 6, 7 },//depth 16 puzzle
                                         { 4, 8, 2 }};
 vector<vector<int>> depth_20_puzzle = {{ 7, 1, 2 },//depth 20 puzzle 
                                         { 4, 8, 5 },
-                                        { 6, 3, 0 }};                                                                
+                                        { 6, 3, 0 }};
+vector<vector<int>> depth_24_puzzle = {{ 0, 7, 2 },//depth 24 puzzle 
+                                        { 4, 6, 1 },
+                                        { 3, 5, 8 }};                                                                                                        
 vector<vector<int>> depth_31_puzzle_1 = {{ 8, 6, 7 },//depth 31 puzzle
                                          { 2, 5, 4 },
                                          { 3, 0, 1 }};
@@ -152,7 +155,7 @@ void expandQueueMisplaced(priority_queue<Node*, vector<Node*>, CompareNodes>& no
     }
     for (Node* child : children) {
             nodes.push(child);
-        }
+    }
 }
 void expandQueueManhattan(priority_queue<Node*, vector<Node*>, CompareNodesManhattanDistance>& nodes, int algorithmType){
     vector<vector<int>> state = nodes.top()->state;
@@ -194,19 +197,26 @@ Node* SearchAlgorithm(vector<vector<int>> puzzle, int algorithmType){
     priority_queue<Node*, vector<Node*>, CompareNodesManhattanDistance> nodes2;
     Node* goal_node = nullptr;
     Node* root = new Node(puzzle);
+    int max_queue_size = 0;
+    long long nodes_expanded = 0;
     if(algorithmType == 0 || algorithmType == 1){
         nodes.push(root);
         while(!nodes.empty()){
             if(goalTest(nodes.top()->state)){
                 goal_node = nodes.top();
                 printPuzzle(goal_node->state);
-                cout << "Solution Depth: " << goal_node->depth << "\n";
+                cout << "Solution depth was " << goal_node->depth << "\n";
+                cout << "Number of nodes expanded: " << nodes_expanded << "\n";
+                cout << "Max queue size: " << max_queue_size << "\n";
                 return goal_node;
             }
             expandQueueMisplaced(nodes, algorithmType);
-            //check for algorithm type to use the right expandQueueMisplaced()?
-            nodes.pop();
             cout << "The best state to expand with a g(n) = " << nodes.top()->depth << " and h(n) = " << getMisplacedTiles(nodes.top()->state) << " is...\n";
+            if(nodes.size() >= max_queue_size){
+                max_queue_size = nodes.size();
+            }
+            nodes.pop();
+            nodes_expanded++;
             printPuzzle(nodes.top()->state);
             cout << endl;
         }
@@ -214,18 +224,24 @@ Node* SearchAlgorithm(vector<vector<int>> puzzle, int algorithmType){
     else if(algorithmType == 2){
         nodes2.push(root);
         while(!nodes2.empty()){
-        if(goalTest(nodes2.top()->state)){
-            goal_node = nodes2.top();
-            printPuzzle(goal_node->state);
-            cout << "Solution Depth: " << goal_node->depth << "\n";
-            return goal_node;
-        }
-        expandQueueManhattan(nodes2, algorithmType);
-        //check for algorithm type to use the right expandQueueMisplaced()?
-        nodes2.pop();
-        cout << "The best state to expand with a g(n) = " << nodes2.top()->depth << " and h(n) = " << getMisplacedTiles(nodes2.top()->state) << " is...\n";
-        printPuzzle(nodes2.top()->state);
-        cout << endl;
+            if(goalTest(nodes2.top()->state)){
+                goal_node = nodes2.top();
+                printPuzzle(goal_node->state);
+                cout << "Solution Depth: " << goal_node->depth << "\n";
+                cout << "Nodes Expanded: " << nodes_expanded << "\n";
+                cout << "Max queue size: " << max_queue_size << "\n";
+                return goal_node;
+            }
+            expandQueueManhattan(nodes2, algorithmType);
+            cout << "The best state to expand with a g(n) = " << nodes2.top()->depth << " and h(n) = " << getMisplacedTiles(nodes2.top()->state) << " is...\n";
+            if(nodes.size() >= max_queue_size){
+                max_queue_size = nodes2.size();
+            }
+            nodes2.pop();
+            nodes_expanded++;
+            
+            printPuzzle(nodes2.top()->state);
+            cout << endl;
         }
     }  
     return nullptr;
@@ -245,44 +261,48 @@ int main(){
     int difficulty = -1;
     if(puzzle_mode == 1){ /////////////////////////////////////////////// CREATE DEFAULT PUZZLE
         cout << "You wish to use a default puzzle. "; 
-        while (difficulty < 0 || difficulty > 8){//checks for valid input
-            cout << "Please enter a desired difficulty on a scale from 0 to 6.\n";
+        while (difficulty < 0 || difficulty > 9){//checks for valid input
+            cout << "Please enter a desired difficulty on a scale from 0 to 9.\n";
             cin >> difficulty;
         }
         if (difficulty == 0){
             cout << "Depth 0 puzzle selected. \n";
             user_puzzle = depth_0_puzzle;
         }
-        if (difficulty == 1){
+        else if (difficulty == 1){
             cout << "Depth 2 puzzle selected. \n";
             user_puzzle = depth_2_puzzle;
         }   
-        if (difficulty == 2){
-            cout << "Depth 4 puzzleselected.\n";
+        else if (difficulty == 2){
+            cout << "Depth 4 puzzle selected.\n";
             user_puzzle = depth_4_puzzle;
         }
-        if (difficulty == 3){
+        else if (difficulty == 3){
             cout << "Depth 8 puzzle selected.\n";
             user_puzzle = depth_8_puzzle;
         }
-        if (difficulty == 4){
+        else if (difficulty == 4){
             cout << "Depth 12 puzzle selected.\n";
             user_puzzle = depth_12_puzzle;
         }  
-        if (difficulty == 5){
+        else if (difficulty == 5){
             cout << "Depth 16 puzzle selected.\n";
             user_puzzle = depth_16_puzzle;
         }  
-        if(difficulty == 6){
+        else if (difficulty == 6){
             cout << "Depth 20 puzzle selected.\n";
             user_puzzle = depth_20_puzzle;
         }
-        if(difficulty == 7){
+        else if (difficulty == 7){
+            cout << "Depth 24 puzzle selected.\n";
+            user_puzzle = depth_24_puzzle;
+        }
+        else if(difficulty == 8){
             cout << "Depth 31 option 1 selected.\n";
             user_puzzle = depth_31_puzzle_1;
         }
-        if(difficulty == 8){
-            cout << "Depth 31 puzzle option 2  selected.\n";
+        else if(difficulty == 9){
+            cout << "Depth 31 puzzle option 2 selected.\n";
             user_puzzle = depth_31_puzzle_2;
         }
         cout << "Your default puzzle:\n";
