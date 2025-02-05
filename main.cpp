@@ -70,6 +70,21 @@ int getMisplacedTiles(vector<vector<int>> state){
     return num_misplaced_tiles;
 }
 
+int getManhattanDistance(vector<vector<int>> state){
+    int distance = 0;
+    for(int i = 0; i < 3; i++){
+        for(int j = 0; j < 3; j++){
+            int value = state[i][j];
+            if(value != 0){
+                int correctRow = (value - 1) / 3;
+                int correctCol = (value - 1) % 3;
+                distance += abs(i - correctRow) + abs(j - correctCol);
+            }
+        }
+    }
+    return distance;
+}
+
 bool goalTest(vector<vector<int>> state){
     if(state == trivial_puzzle){
         return true;
@@ -90,27 +105,24 @@ void printPuzzle(vector<vector<int>> puzzle){//Prints the puzzle
 
 struct CompareNodes {
     bool operator()(Node* a, Node* b) {
-        return (a->depth + getMisplacedTiles(a->state)) > (b->depth + getMisplacedTiles(b->state)); // Min-heap
+        return (a->depth + getMisplacedTiles(a->state)) > (b->depth + getMisplacedTiles(b->state));
     }
 };
 
-void pushChildren(priority_queue<Node*, vector<Node*>, CompareNodes>& nodes, Node* child_1, Node* child_2, Node* child_3, Node* child_4){
-    nodes.push(child_1);
-    nodes.push(child_2);
-    if(child_3){
-        nodes.push(child_3);
+struct CompareNodesManhattanDistance {
+    bool operator()(Node* a, Node* b) {
+        return (a->depth + getManhattanDistance(a->state)) > (b->depth + getManhattanDistance(b->state)); 
     }
-    if(child_4){
-        nodes.push(child_4);
-    }
-}
+};
+
+
 void pushChildren(priority_queue<Node*, vector<Node*>, CompareNodes>& nodes, vector<Node*> children){
     for (Node* child : children) {
         nodes.push(child);
     }
 }
 
-void expandQueue(priority_queue<Node*, vector<Node*>, CompareNodes>& nodes, int algorithmType){
+void expandQueueMisplaced(priority_queue<Node*, vector<Node*>, CompareNodes>& nodes, int algorithmType){
     vector<vector<int>> state = nodes.top()->state;
     int row = -1, col = -1;
 
@@ -124,7 +136,6 @@ void expandQueue(priority_queue<Node*, vector<Node*>, CompareNodes>& nodes, int 
             }
         }
     }
-
     // Possible moves: {row_change, col_change}
     vector<pair<int, int>> moves = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
     vector<Node*> children;
@@ -140,42 +151,84 @@ void expandQueue(priority_queue<Node*, vector<Node*>, CompareNodes>& nodes, int 
             children.push_back(child);
         }
     }
-
-    // Push nodes based on the algorithm type
-    if (algorithmType == 0) { // Uniform Cost Search
-        for (Node* child : children) {
+    for (Node* child : children) {
             nodes.push(child);
         }
-    } 
-    else if (algorithmType == 1) { // Misplaced Tile Heuristic
-        pushChildren(nodes, children);
-    } 
-    else if (algorithmType == 2) { // Manhattan Distance Heuristic
-        // Implement heuristic-based priority logic here
+}
+void expandQueueManhattan(priority_queue<Node*, vector<Node*>, CompareNodesManhattanDistance>& nodes, int algorithmType){
+    vector<vector<int>> state = nodes.top()->state;
+    int row = -1, col = -1;
+
+    // Find where blank space (0) is
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (state[i][j] == 0) {
+                row = i;
+                col = j;
+                break;
+            }
+        }
+    }
+    // Possible moves: {row_change, col_change}
+    vector<pair<int, int>> moves = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+    vector<Node*> children;
+
+    for (const auto& move : moves) {
+        int newRow = row + move.first;
+        int newCol = col + move.second;
+
+        if (newRow >= 0 && newRow < 3 && newCol >= 0 && newCol < 3) {// Check if the move is within bounds of vector
+            vector<vector<int>> next_state = state;
+            swap(next_state[row][col], next_state[newRow][newCol]); // Move blank
+            Node* child = new Node(next_state, nodes.top(), nodes.top()->depth + 1);
+            children.push_back(child);
+        }
+    }
+    for (Node* child : children) {
+        nodes.push(child);
     }
 }
 
 //Function uniform cost search (same for all 3 types of searches)
 Node* SearchAlgorithm(vector<vector<int>> puzzle, int algorithmType){
-    //queue<Node*> nodes;
     priority_queue<Node*, vector<Node*>, CompareNodes> nodes;
-    Node* root = new Node(puzzle);
-    nodes.push(root);
+    priority_queue<Node*, vector<Node*>, CompareNodesManhattanDistance> nodes2;
     Node* goal_node = nullptr;
-    
-    while(!nodes.empty()){
-        if(goalTest(nodes.top()->state)){
-            goal_node = nodes.top();
+    Node* root = new Node(puzzle);
+    if(algorithmType == 0 || algorithmType == 1){
+        nodes.push(root);
+        while(!nodes.empty()){
+            if(goalTest(nodes.top()->state)){
+                goal_node = nodes.top();
+                printPuzzle(goal_node->state);
+                cout << "Solution Depth: " << goal_node->depth << "\n";
+                return goal_node;
+            }
+            expandQueueMisplaced(nodes, algorithmType);
+            //check for algorithm type to use the right expandQueueMisplaced()?
+            nodes.pop();
+            cout << "The best state to expand with a g(n) = " << nodes.top()->depth << " and h(n) = " << getMisplacedTiles(nodes.top()->state) << " is...\n";
+            printPuzzle(nodes.top()->state);
+            cout << endl;
+        }
+    }
+    else if(algorithmType == 2){
+        nodes2.push(root);
+        while(!nodes2.empty()){
+        if(goalTest(nodes2.top()->state)){
+            goal_node = nodes2.top();
             printPuzzle(goal_node->state);
             cout << "Solution Depth: " << goal_node->depth << "\n";
             return goal_node;
         }
-        expandQueue(nodes, algorithmType);
-        nodes.pop();
-        cout << "The best state to expand with a g(n) = " << nodes.top()->depth << " and h(n) = " << getMisplacedTiles(nodes.top()->state) << " is...\n";
-        printPuzzle(nodes.top()->state);
+        expandQueueManhattan(nodes2, algorithmType);
+        //check for algorithm type to use the right expandQueueMisplaced()?
+        nodes2.pop();
+        cout << "The best state to expand with a g(n) = " << nodes2.top()->depth << " and h(n) = " << getMisplacedTiles(nodes2.top()->state) << " is...\n";
+        printPuzzle(nodes2.top()->state);
         cout << endl;
-    }
+        }
+    }  
     return nullptr;
 }
 
