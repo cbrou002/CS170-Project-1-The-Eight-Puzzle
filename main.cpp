@@ -6,27 +6,33 @@
 
 using namespace std;
 
-vector<vector<int>> trivial_puzzle = {{ 1, 2, 3 },
+vector<vector<int>> depth_0_puzzle = {{ 1, 2, 3 },//Depth 0 puzzle
                                       { 4, 5, 6 },
                                       { 7, 8, 0 }};
-vector<vector<int>> very_easy_puzzle = {{ 1, 2, 3 },
+vector<vector<int>> depth_2_puzzle = {{ 1, 2, 3 },//depth 2 puzzle
                                         { 4, 5, 6 },
                                         { 0, 7, 8 }};
-vector<vector<int>> easy_puzzle = {{ 1, 2, 3 },
+vector<vector<int>> depth_4_puzzle = {{ 1, 2, 3 },//depth 4 puzzle
                                    { 5, 0, 6 },
                                    { 4, 7, 8 }};
-vector<vector<int>> doable_puzzle = {{ 1, 3, 6 },
+vector<vector<int>> depth_8_puzzle = {{ 1, 3, 6 },//depth 8 puzzle
                                      {5, 0, 2 },
                                      { 4, 7, 8 }};
-vector<vector<int>> hard_puzzle = {{ 1, 3, 6 },
+vector<vector<int>> depth_12_puzzle = {{ 1, 3, 6 },//depth 12 puzzle
                                    { 5, 0, 7 },
                                    { 4, 8, 2 }};
-vector<vector<int>> very_hard_puzzle = {{ 1, 6, 7 },
+vector<vector<int>> depth_16_puzzle = {{ 1, 6, 7 },//depth 16 puzzle
                                         { 5, 0, 3 },
-                                        { 4, 8, 2 }};                                   
-vector<vector<int>> impossible_puzzle = {{ 8, 6, 7 },
+                                        { 4, 8, 2 }};
+vector<vector<int>> depth_20_puzzle = {{ 7, 1, 2 },//depth 20 puzzle added
+                                        { 4, 8, 5 },
+                                        { 6, 3, 0 }};                                                                
+vector<vector<int>> depth_31_puzzle_1 = {{ 8, 6, 7 },//depth 31
                                          { 2, 5, 4 },
                                          { 3, 0, 1 }};
+vector<vector<int>> depth_31_puzzle_2 = {{ 6, 4, 7 },//depth 31 added
+                                         { 8, 5, 0 },
+                                         { 3, 2, 1 }};
 
 struct Node{ //node structure
     vector<vector<int>> state; //current state of the puzzle
@@ -86,7 +92,7 @@ int getManhattanDistance(vector<vector<int>> state){
 }
 
 bool goalTest(vector<vector<int>> state){
-    if(state == trivial_puzzle){
+    if(state == depth_0_puzzle){
         return true;
     }
     else{
@@ -114,13 +120,6 @@ struct CompareNodesManhattanDistance {
         return (a->depth + getManhattanDistance(a->state)) > (b->depth + getManhattanDistance(b->state)); 
     }
 };
-
-
-void pushChildren(priority_queue<Node*, vector<Node*>, CompareNodes>& nodes, vector<Node*> children){
-    for (Node* child : children) {
-        nodes.push(child);
-    }
-}
 
 void expandQueueMisplaced(priority_queue<Node*, vector<Node*>, CompareNodes>& nodes, int algorithmType){
     vector<vector<int>> state = nodes.top()->state;
@@ -251,32 +250,32 @@ int main(){
             cin >> difficulty;
         }
         if (difficulty == 0){
-            cout << "Trivial difficulty selected. \n";
-            user_puzzle = trivial_puzzle;
+            cout << "Depth 0 puzzle selected. \n";
+            user_puzzle = depth_0_puzzle;
         }
         if (difficulty == 1){
-            cout << "Very easy difficulty selected. \n";
-            user_puzzle = very_easy_puzzle;
+            cout << "Depth 2 puzzle selected. \n";
+            user_puzzle = depth_2_puzzle;
         }   
         if (difficulty == 2){
-            cout << "Easy difficulty selected.\n";
-            user_puzzle = easy_puzzle;
+            cout << "Depth 4 puzzleselected.\n";
+            user_puzzle = depth_4_puzzle;
         }
         if (difficulty == 3){
-            cout << "Doable difficulty selected.\n";
-            user_puzzle = doable_puzzle;
+            cout << "Depth 8 puzzle selected.\n";
+            user_puzzle = depth_8_puzzle;
         }
         if (difficulty == 4){
-            cout << "Hard difficulty selected.\n";
-            user_puzzle = hard_puzzle;
+            cout << "Depth 12 puzzle selected.\n";
+            user_puzzle = depth_12_puzzle;
         }  
         if (difficulty == 5){
-            cout << "Very hard difficulty selected.\n";
-            user_puzzle = very_hard_puzzle;
+            cout << "Depth 16 puzzle selected.\n";
+            user_puzzle = depth_16_puzzle;
         }  
         if(difficulty == 6){
             cout << "Impossible difficulty selected.\n";
-            user_puzzle = impossible_puzzle;
+            user_puzzle = depth_31_puzzle_1;
         }
         cout << "Your default puzzle:\n";
         printPuzzle(user_puzzle);
