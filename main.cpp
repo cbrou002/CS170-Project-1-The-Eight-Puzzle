@@ -114,17 +114,22 @@ void printPuzzle(vector<vector<int>> puzzle){//Prints the puzzle
 
 struct CompareNodes {
     bool operator()(Node* a, Node* b) {
+        return (a->depth) > (b->depth);
+    }
+};
+struct CompareNodesMisplacedTiles {
+    bool operator()(Node* a, Node* b) {
         return (a->depth + getMisplacedTiles(a->state)) > (b->depth + getMisplacedTiles(b->state));
     }
 };
-
 struct CompareNodesManhattanDistance {
     bool operator()(Node* a, Node* b) {
         return (a->depth + getManhattanDistance(a->state)) > (b->depth + getManhattanDistance(b->state)); 
     }
 };
 
-void expandQueueMisplaced(priority_queue<Node*, vector<Node*>, CompareNodes>& nodes, int algorithmType){
+template <typename Compare>
+void expandQueueMisplaced(priority_queue<Node*, vector<Node*>, Compare>& nodes, int algorithmType){
     vector<vector<int>> state = nodes.top()->state;
     int row = -1, col = -1;
 
@@ -157,90 +162,81 @@ void expandQueueMisplaced(priority_queue<Node*, vector<Node*>, CompareNodes>& no
             nodes.push(child);
     }
 }
-void expandQueueManhattan(priority_queue<Node*, vector<Node*>, CompareNodesManhattanDistance>& nodes, int algorithmType){
-    vector<vector<int>> state = nodes.top()->state;
-    int row = -1, col = -1;
-
-    // Find where blank space (0) is
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            if (state[i][j] == 0) {
-                row = i;
-                col = j;
-                break;
-            }
-        }
-    }
-    // Possible moves: {row_change, col_change}
-    vector<pair<int, int>> moves = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-    vector<Node*> children;
-
-    for (const auto& move : moves) {
-        int newRow = row + move.first;
-        int newCol = col + move.second;
-
-        if (newRow >= 0 && newRow < 3 && newCol >= 0 && newCol < 3) {// Check if the move is within bounds of vector
-            vector<vector<int>> next_state = state;
-            swap(next_state[row][col], next_state[newRow][newCol]); // Move blank
-            Node* child = new Node(next_state, nodes.top(), nodes.top()->depth + 1);
-            children.push_back(child);
-        }
-    }
-    for (Node* child : children) {
-        nodes.push(child);
-    }
-}
 
 //Function uniform cost search (same for all 3 types of searches)
 Node* SearchAlgorithm(vector<vector<int>> puzzle, int algorithmType){
-    priority_queue<Node*, vector<Node*>, CompareNodes> nodes;
-    priority_queue<Node*, vector<Node*>, CompareNodesManhattanDistance> nodes2;
+    priority_queue<Node*, vector<Node*>, CompareNodes> uniform_cost_nodes;
+    priority_queue<Node*, vector<Node*>, CompareNodesMisplacedTiles> misplaced_nodes;
+    priority_queue<Node*, vector<Node*>, CompareNodesManhattanDistance> manhattan_nodes;
     Node* goal_node = nullptr;
     Node* root = new Node(puzzle);
     int max_queue_size = 0;
     long long nodes_expanded = 0;
-    if(algorithmType == 0 || algorithmType == 1){
-        nodes.push(root);
-        while(!nodes.empty()){
-            if(goalTest(nodes.top()->state)){
-                goal_node = nodes.top();
+
+    if(algorithmType == 0){
+        uniform_cost_nodes.push(root);
+        while(!uniform_cost_nodes.empty()){
+            if(goalTest(uniform_cost_nodes.top()->state)){
+                goal_node = uniform_cost_nodes.top();
                 printPuzzle(goal_node->state);
                 cout << "Solution depth was " << goal_node->depth << "\n";
                 cout << "Number of nodes expanded: " << nodes_expanded << "\n";
                 cout << "Max queue size: " << max_queue_size << "\n";
                 return goal_node;
             }
-            expandQueueMisplaced(nodes, algorithmType);
-            cout << "The best state to expand with a g(n) = " << nodes.top()->depth << " and h(n) = " << getMisplacedTiles(nodes.top()->state) << " is...\n";
-            if(nodes.size() >= max_queue_size){
-                max_queue_size = nodes.size();
+            expandQueueMisplaced(uniform_cost_nodes, algorithmType);
+            cout << "The best state to expand with a g(n) = " << uniform_cost_nodes.top()->depth << " and h(n) = " << getMisplacedTiles(uniform_cost_nodes.top()->state) << " is...\n";
+            if(uniform_cost_nodes.size() >= max_queue_size){
+                max_queue_size = uniform_cost_nodes.size();
             }
-            nodes.pop();
+            uniform_cost_nodes.pop();
             nodes_expanded++;
-            printPuzzle(nodes.top()->state);
+            printPuzzle(uniform_cost_nodes.top()->state);
+            cout << endl;
+        }
+    }
+    else if(algorithmType == 1){
+        misplaced_nodes.push(root);
+        while(!misplaced_nodes.empty()){
+            if(goalTest(misplaced_nodes.top()->state)){
+                goal_node = misplaced_nodes.top();
+                printPuzzle(goal_node->state);
+                cout << "Solution depth was " << goal_node->depth << "\n";
+                cout << "Number of nodes expanded: " << nodes_expanded << "\n";
+                cout << "Max queue size: " << max_queue_size << "\n";
+                return goal_node;
+            }
+            expandQueueMisplaced(misplaced_nodes, algorithmType);
+            cout << "The best state to expand with a g(n) = " << misplaced_nodes.top()->depth << " and h(n) = " << getMisplacedTiles(misplaced_nodes.top()->state) << " is...\n";
+            if(misplaced_nodes.size() >= max_queue_size){
+                max_queue_size = misplaced_nodes.size();
+            }
+            misplaced_nodes.pop();
+            nodes_expanded++;
+            printPuzzle(misplaced_nodes.top()->state);
             cout << endl;
         }
     }
     else if(algorithmType == 2){
-        nodes2.push(root);
-        while(!nodes2.empty()){
-            if(goalTest(nodes2.top()->state)){
-                goal_node = nodes2.top();
+        manhattan_nodes.push(root);
+        while(!manhattan_nodes.empty()){
+            if(goalTest(manhattan_nodes.top()->state)){
+                goal_node = manhattan_nodes.top();
                 printPuzzle(goal_node->state);
                 cout << "Solution Depth: " << goal_node->depth << "\n";
                 cout << "Nodes Expanded: " << nodes_expanded << "\n";
                 cout << "Max queue size: " << max_queue_size << "\n";
                 return goal_node;
             }
-            expandQueueManhattan(nodes2, algorithmType);
-            cout << "The best state to expand with a g(n) = " << nodes2.top()->depth << " and h(n) = " << getMisplacedTiles(nodes2.top()->state) << " is...\n";
-            if(nodes.size() >= max_queue_size){
-                max_queue_size = nodes2.size();
+            expandQueueMisplaced(manhattan_nodes, algorithmType);
+            cout << "The best state to expand with a g(n) = " << manhattan_nodes.top()->depth << " and h(n) = " << getMisplacedTiles(manhattan_nodes.top()->state) << " is...\n";
+            if(manhattan_nodes.size() >= max_queue_size){
+                max_queue_size = manhattan_nodes.size();
             }
-            nodes2.pop();
+            manhattan_nodes.pop();
             nodes_expanded++;
             
-            printPuzzle(nodes2.top()->state);
+            printPuzzle(manhattan_nodes.top()->state);
             cout << endl;
         }
     }  
