@@ -42,10 +42,10 @@ struct Node{ //node structure
         parent = p;
         depth = 0;
     }
-    Node(const vector<vector<int>>& s, Node* p, int depth_){//Node Constructor
+    Node(const vector<vector<int>>& s, Node* p, int d){//Node Constructor
         state = s;
         parent = p;
-        depth = depth_;
+        depth = d;
     }
 };
 
@@ -87,8 +87,23 @@ void printPuzzle(vector<vector<int>> puzzle){//Prints the puzzle
             cout << endl;
         }
 }
-void pushChildren(queue<Node*>& nodes, Node* child_1, Node* child_2, Node* child_3, Node* child_4){
-     // Calculate heuristics, using a large number (100) for null children
+
+struct CompareNodes {
+    bool operator()(Node* a, Node* b) {
+        return (a->depth + getMisplacedTiles(a->state)) > (b->depth + getMisplacedTiles(b->state)); // Min-heap
+    }
+};
+
+void pushChildren(priority_queue<Node*, vector<Node*>, CompareNodes>& nodes, Node* child_1, Node* child_2, Node* child_3, Node* child_4){
+    nodes.push(child_1);
+    nodes.push(child_2);
+    if(child_3){
+        nodes.push(child_3);
+    }
+    if(child_4){
+        nodes.push(child_4);
+    }
+    /* // Calculate heuristics, using a large number (100) for null children
     int heuristic_1 = (child_1) ? getMisplacedTiles(child_1->state) : 1000;
     int heuristic_2 = (child_2) ? getMisplacedTiles(child_2->state) : 1000;
     int heuristic_3 = (child_3) ? getMisplacedTiles(child_3->state) : 1000;
@@ -109,25 +124,25 @@ void pushChildren(queue<Node*>& nodes, Node* child_1, Node* child_2, Node* child
     // Push the sorted children onto the queue
     for (const auto& child : children) {
         nodes.push(child.second);
-    }
+    }*/
 }
 
-void expandQueue(queue<Node*>& nodes, int algorithmType){
+void expandQueue(priority_queue<Node*, vector<Node*>, CompareNodes>& nodes, int algorithmType){
     int temp;
-    vector<vector<int>> state = nodes.front()->state;
+    vector<vector<int>> state = nodes.top()->state;
     if(state[0][0] == 0){   //blank in upper left corner
         //moving blank space down
         temp = state[1][0]; 
         vector<vector<int>> next_state_1 = state;
         next_state_1[0][0] = temp;
         next_state_1[1][0] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
+        Node* child_1 = new Node(next_state_1, nodes.top(), nodes.top()->depth + 1);
         //moving blank space right
         temp = state[0][1]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[0][0] = temp;
         next_state_2[0][1] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1); 
+        Node* child_2 = new Node(next_state_2, nodes.top(), nodes.top()->depth + 1); 
         switch (algorithmType){
             case 0: // Uniform Cost Search (Uninformed)
                 nodes.push(child_1);
@@ -146,19 +161,19 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
         vector<vector<int>> next_state_1 = state;
         next_state_1[0][1] = temp;
         next_state_1[0][0] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
+        Node* child_1 = new Node(next_state_1, nodes.top(), nodes.top()->depth + 1);
         //moving blank space down
         temp = state[1][1]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[0][1] = temp;
         next_state_2[1][1] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
+        Node* child_2 = new Node(next_state_2, nodes.top(), nodes.top()->depth + 1);
         //moving blank space right
         temp = state[0][2]; 
         vector<vector<int>> next_state_3 = state;
         next_state_3[0][1] = temp;
         next_state_3[0][2] = 0;
-        Node* child_3 = new Node(next_state_3, nodes.front(), nodes.front()->depth + 1);
+        Node* child_3 = new Node(next_state_3, nodes.top(), nodes.top()->depth + 1);
         switch (algorithmType){
             case 0: // Uniform Cost Search (Uninformed)
                 nodes.push(child_1);
@@ -178,13 +193,13 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
         vector<vector<int>> next_state_1 = state;
         next_state_1[0][2] = temp;
         next_state_1[0][1] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
+        Node* child_1 = new Node(next_state_1, nodes.top(), nodes.top()->depth + 1);
         //moving blank space down
         temp = state[1][2]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[0][2] = temp;
         next_state_2[1][2] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
+        Node* child_2 = new Node(next_state_2, nodes.top(), nodes.top()->depth + 1);
         switch (algorithmType){
             case 0: // Uniform Cost Search (Uninformed)
                 nodes.push(child_1);
@@ -203,19 +218,19 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
         vector<vector<int>> next_state_1 = state;
         next_state_1[1][0] = temp;
         next_state_1[0][0] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
+        Node* child_1 = new Node(next_state_1, nodes.top(), nodes.top()->depth + 1);
         //moving blank space down
         temp = state[2][0]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[1][0] = temp;
         next_state_2[2][0] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
+        Node* child_2 = new Node(next_state_2, nodes.top(), nodes.top()->depth + 1);
         //moving blank space right
         temp = state[1][1]; 
         vector<vector<int>> next_state_3 = state;
         next_state_3[1][0] = temp;
         next_state_3[1][1] = 0;
-        Node* child_3 = new Node(next_state_3, nodes.front(), nodes.front()->depth + 1);
+        Node* child_3 = new Node(next_state_3, nodes.top(), nodes.top()->depth + 1);
         switch (algorithmType){
             case 0: // Uniform Cost Search (Uninformed)
                 nodes.push(child_1);
@@ -235,25 +250,25 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
         vector<vector<int>> next_state_1 = state;
         next_state_1[1][1] = temp;
         next_state_1[0][1] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
+        Node* child_1 = new Node(next_state_1, nodes.top(), nodes.top()->depth + 1);
         //moving blank space down
         temp = state[2][1]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[1][1] = temp;
         next_state_2[2][1] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
+        Node* child_2 = new Node(next_state_2, nodes.top(), nodes.top()->depth + 1);
         //moving blank space right
         temp = state[1][2]; 
         vector<vector<int>> next_state_3 = state;
         next_state_3[1][1] = temp;
         next_state_3[1][2] = 0;
-        Node* child_3 = new Node(next_state_3, nodes.front(), nodes.front()->depth + 1);
+        Node* child_3 = new Node(next_state_3, nodes.top(), nodes.top()->depth + 1);
         //moving blank space left
         temp = state[1][0]; 
         vector<vector<int>> next_state_4 = state;
         next_state_4[1][1] = temp;
         next_state_4[1][0] = 0;
-        Node* child_4 = new Node(next_state_4, nodes.front(), nodes.front()->depth + 1);
+        Node* child_4 = new Node(next_state_4, nodes.top(), nodes.top()->depth + 1);
         switch (algorithmType){
             case 0: // Uniform Cost Search (Uninformed)
                 nodes.push(child_1);
@@ -274,19 +289,19 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
         vector<vector<int>> next_state_1 = state;
         next_state_1[1][2] = temp;
         next_state_1[0][2] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
+        Node* child_1 = new Node(next_state_1, nodes.top(), nodes.top()->depth + 1);
         //moving blank space down
         temp = state[2][2]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[1][2] = temp;
         next_state_2[2][2] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
+        Node* child_2 = new Node(next_state_2, nodes.top(), nodes.top()->depth + 1);
         //moving blank space left
         temp = state[1][1]; 
         vector<vector<int>> next_state_3 = state;
         next_state_3[1][2] = temp;
         next_state_3[1][1] = 0;
-        Node* child_3 = new Node(next_state_3, nodes.front(), nodes.front()->depth + 1);
+        Node* child_3 = new Node(next_state_3, nodes.top(), nodes.top()->depth + 1);
         switch (algorithmType){
             case 0: // Uniform Cost Search (Uninformed)
                 nodes.push(child_1);
@@ -306,13 +321,13 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
         vector<vector<int>> next_state_1 = state;
         next_state_1[2][0] = temp;
         next_state_1[1][0] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
+        Node* child_1 = new Node(next_state_1, nodes.top(), nodes.top()->depth + 1);
         //moving blank space right
         temp = state[2][1]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[2][0] = temp;
         next_state_2[2][1] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
+        Node* child_2 = new Node(next_state_2, nodes.top(), nodes.top()->depth + 1);
         switch (algorithmType){
             case 0: // Uniform Cost Search (Uninformed)
                 nodes.push(child_1);
@@ -331,19 +346,19 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
         vector<vector<int>> next_state_1 = state;
         next_state_1[2][1] = temp;
         next_state_1[1][1] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
+        Node* child_1 = new Node(next_state_1, nodes.top(), nodes.top()->depth + 1);
         //moving blank space left
         temp = state[2][0]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[2][1] = temp;
         next_state_2[2][0] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
+        Node* child_2 = new Node(next_state_2, nodes.top(), nodes.top()->depth + 1);
         //moving blank space right
         temp = state[2][2]; 
         vector<vector<int>> next_state_3 = state;
         next_state_3[2][1] = temp;
         next_state_3[2][2] = 0;
-        Node* child_3 = new Node(next_state_3, nodes.front(), nodes.front()->depth + 1);
+        Node* child_3 = new Node(next_state_3, nodes.top(), nodes.top()->depth + 1);
         switch (algorithmType){
             case 0: // Uniform Cost Search (Uninformed)
                 nodes.push(child_1);
@@ -363,13 +378,13 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
         vector<vector<int>> next_state_1 = state;
         next_state_1[2][2] = temp;
         next_state_1[2][1] = 0;
-        Node* child_1 = new Node(next_state_1, nodes.front(), nodes.front()->depth + 1);
+        Node* child_1 = new Node(next_state_1, nodes.top(), nodes.top()->depth + 1);
         //moving blank space up
         temp = state[1][2]; 
         vector<vector<int>> next_state_2 = state;
         next_state_2[2][2] = temp;
         next_state_2[1][2] = 0;
-        Node* child_2 = new Node(next_state_2, nodes.front(), nodes.front()->depth + 1);
+        Node* child_2 = new Node(next_state_2, nodes.top(), nodes.top()->depth + 1);
         switch (algorithmType){
             case 0: // Uniform Cost Search (Uninformed)
                 nodes.push(child_1);
@@ -387,21 +402,24 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
 
 //Function uniform cost search (same for all 3 types of searches)
 Node* SearchAlgorithm(vector<vector<int>> puzzle, int algorithmType){
-    queue<Node*> nodes;
+    //queue<Node*> nodes;
+    priority_queue<Node*, vector<Node*>, CompareNodes> nodes;
     Node* root = new Node(puzzle);
     nodes.push(root);
     Node* goal_node = nullptr;
     
     while(!nodes.empty()){
-        Node* front = nodes.front();
-        if(goalTest(nodes.front()->state)){
-            goal_node = nodes.front();
+        if(goalTest(nodes.top()->state)){
+            goal_node = nodes.top();
             printPuzzle(goal_node->state);
-            cout << "Solution Depth: " << goal_node->depth;
+            cout << "Solution Depth: " << goal_node->depth << "\n";
             return goal_node;
         }
         expandQueue(nodes, algorithmType);
         nodes.pop();
+        cout << "The best state to expand with a g(n) = " << nodes.top()->depth << " and h(n) = " << getMisplacedTiles(nodes.top()->state) << " is...\n";
+        printPuzzle(nodes.top()->state);
+        cout << endl;
     }
     return nullptr;
 }
@@ -452,6 +470,9 @@ int main(){
             cout << "Impossible difficulty selected.\n";
             user_puzzle = impossible_puzzle;
         }
+        cout << "Your default puzzle:\n";
+        printPuzzle(user_puzzle);
+        cout << endl;
     }
     else if(puzzle_mode == 2){ /////////////////////////////////////////// CREATE CUSTOM PUZZLE
         cout << "Enter your puzzle, using a zero to represent the blank. Please only enter valid 8-puzzles.\n";
