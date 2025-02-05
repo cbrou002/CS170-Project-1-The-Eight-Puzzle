@@ -12,7 +12,7 @@ vector<vector<int>> trivial_puzzle = {{ 1, 2, 3 },
 vector<vector<int>> very_easy_puzzle = {{ 1, 2, 3 },
                                         { 4, 5, 6 },
                                         { 0, 7, 8 }};
-vector<vector<int>> easy_puzzle = {{ 1, 2, 0 },
+vector<vector<int>> easy_puzzle = {{ 1, 2, 3 },
                                    { 5, 0, 6 },
                                    { 4, 7, 8 }};
 vector<vector<int>> doable_puzzle = {{ 1, 3, 6 },
@@ -21,6 +21,9 @@ vector<vector<int>> doable_puzzle = {{ 1, 3, 6 },
 vector<vector<int>> hard_puzzle = {{ 1, 3, 6 },
                                    { 5, 0, 7 },
                                    { 4, 8, 2 }};
+vector<vector<int>> very_hard_puzzle = {{ 1, 6, 7 },
+                                        { 5, 0, 3 },
+                                        { 4, 8, 2 }};                                   
 vector<vector<int>> impossible_puzzle = {{ 8, 6, 7 },
                                          { 2, 5, 4 },
                                          { 3, 0, 1 }};
@@ -84,6 +87,38 @@ void printPuzzle(vector<vector<int>> puzzle){//Prints the puzzle
             cout << endl;
         }
 }
+void pushChildren(queue<Node*>& nodes, Node* child_1, Node* child_2, Node* child_3, Node* child_4){
+     // Calculate heuristics, using a large number (100) for null children
+    int heuristic_1 = (child_1) ? getMisplacedTiles(child_1->state) : 1000;
+    int heuristic_2 = (child_2) ? getMisplacedTiles(child_2->state) : 1000;
+    int heuristic_3 = (child_3) ? getMisplacedTiles(child_3->state) : 1000;
+    int heuristic_4 = (child_4) ? getMisplacedTiles(child_4->state) : 1000;
+
+    // Vector stores children with their heuristics
+    vector<pair<int, Node*>> children;
+    if (child_1){
+        children.push_back({heuristic_1, child_1});
+    }
+    if (child_2){
+        children.push_back({heuristic_2, child_2});
+    } 
+    if (child_3){
+        children.push_back({heuristic_3, child_3});
+    } 
+    if (child_4){
+        children.push_back({heuristic_4, child_4});
+    } 
+
+    // Sort the children based on their heuristics (in ascending order)
+    sort(children.begin(), children.end(), [](const pair<int, Node*>& a, const pair<int, Node*>& b) {
+        return a.first < b.first;
+    });
+
+    // Push the sorted children onto the queue
+    for (const auto& child : children) {
+        nodes.push(child.second);
+    }
+}
 
 void expandQueue(queue<Node*>& nodes, int algorithmType){
     int temp;
@@ -107,14 +142,7 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
                 nodes.push(child_2);
                 break;
             case 1: // Misplaced Tile Heuristic
-                if(getMisplacedTiles(child_1->state) < getMisplacedTiles(child_2->state)){
-                    nodes.push(child_1);
-                    nodes.push(child_2);
-                }
-                else{
-                    nodes.push(child_2);
-                    nodes.push(child_1);
-                }
+                pushChildren(nodes, child_1, child_2, nullptr, nullptr);
                 break;
             case 2: // Manhattan Distance Heuristic
                 break;
@@ -146,23 +174,7 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
                 nodes.push(child_3);
                 break;
             case 1: // Misplaced Tile Heuristic
-                //Node* best_node = nullptr;
-                int heuristics[3];
-                heuristics[0] = getMisplacedTiles(child_1->state);
-                heuristics[1] = getMisplacedTiles(child_2->state);
-                heuristics[2] = getMisplacedTiles(child_3->state);
-                sort(heuristics, heuristics + 3);
-                for(int i = 0; i < 3; i++){
-                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
-                        nodes.push(child_1);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
-                        nodes.push(child_2);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_3->state)){
-                        nodes.push(child_3);
-                    }
-                }    
+                pushChildren(nodes, child_1, child_2, child_3, nullptr);
                 break;
             case 2: // Manhattan Distance Heuristic
                 break;
@@ -187,19 +199,7 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
                 nodes.push(child_2);
                 break;
             case 1: // Misplaced Tile Heuristic
-                //Node* best_node = nullptr;
-                int heuristics[2];
-                heuristics[0] = getMisplacedTiles(child_1->state);
-                heuristics[1] = getMisplacedTiles(child_2->state);
-                sort(heuristics, heuristics + 2);
-                for(int i = 0; i < 2; i++){
-                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
-                        nodes.push(child_1);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
-                        nodes.push(child_2);
-                    }
-                }    
+                pushChildren(nodes, child_1, child_2, nullptr, nullptr);
                 break;
             case 2: // Manhattan Distance Heuristic
                 break;
@@ -231,22 +231,7 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
                 nodes.push(child_3);
                 break;
             case 1: // Misplaced Tile Heuristic
-                int heuristics[3];
-                heuristics[0] = getMisplacedTiles(child_1->state);
-                heuristics[1] = getMisplacedTiles(child_2->state);
-                heuristics[2] = getMisplacedTiles(child_3->state);
-                sort(heuristics, heuristics + 3);
-                for(int i = 0; i < 3; i++){
-                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
-                        nodes.push(child_1);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
-                        nodes.push(child_2);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_3->state)){
-                        nodes.push(child_3);
-                    }
-                }    
+                pushChildren(nodes, child_1, child_2, child_3, nullptr);
                 break;
             case 2: // Manhattan Distance Heuristic
                 break;
@@ -285,27 +270,7 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
                 nodes.push(child_4);
                 break;
             case 1: // Misplaced Tile Heuristic
-                //Node* best_node = nullptr;
-                int heuristics[4];
-                heuristics[0] = getMisplacedTiles(child_1->state);
-                heuristics[1] = getMisplacedTiles(child_2->state);
-                heuristics[2] = getMisplacedTiles(child_3->state);
-                heuristics[3] = getMisplacedTiles(child_4->state);
-                sort(heuristics, heuristics + 4);
-                for(int i = 0; i < 4; i++){
-                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
-                        nodes.push(child_1);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
-                        nodes.push(child_2);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_3->state)){
-                        nodes.push(child_3);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_4->state)){
-                        nodes.push(child_4);
-                    }
-                }    
+                pushChildren(nodes, child_1, child_2, child_3, child_4);
                 break;
             case 2: // Manhattan Distance Heuristic
                 break;
@@ -337,23 +302,7 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
                 nodes.push(child_3);
                 break;
             case 1: // Misplaced Tile Heuristic
-                //Node* best_node = nullptr;
-                int heuristics[3];
-                heuristics[0] = getMisplacedTiles(child_1->state);
-                heuristics[1] = getMisplacedTiles(child_2->state);
-                heuristics[2] = getMisplacedTiles(child_3->state);
-                sort(heuristics, heuristics + 3);
-                for(int i = 0; i < 3; i++){
-                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
-                        nodes.push(child_1);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
-                        nodes.push(child_2);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_3->state)){
-                        nodes.push(child_3);
-                    }
-                }    
+                pushChildren(nodes, child_1, child_2, child_3, nullptr);
                 break;
             case 2: // Manhattan Distance Heuristic
                 break;
@@ -378,19 +327,7 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
                 nodes.push(child_2);
                 break;
             case 1: // Misplaced Tile Heuristic
-                //Node* best_node = nullptr;
-                int heuristics[2];
-                heuristics[0] = getMisplacedTiles(child_1->state);
-                heuristics[1] = getMisplacedTiles(child_2->state);
-                sort(heuristics, heuristics + 2);
-                for(int i = 0; i < 2; i++){
-                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
-                        nodes.push(child_1);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
-                        nodes.push(child_2);
-                    }
-                }    
+                pushChildren(nodes, child_1, child_2, nullptr, nullptr);
                 break;
             case 2: // Manhattan Distance Heuristic
                 break;
@@ -422,23 +359,7 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
                 nodes.push(child_3);
                 break;
             case 1: // Misplaced Tile Heuristic
-                //Node* best_node = nullptr;
-                int heuristics[3];
-                heuristics[0] = getMisplacedTiles(child_1->state);
-                heuristics[1] = getMisplacedTiles(child_2->state);
-                heuristics[2] = getMisplacedTiles(child_3->state);
-                sort(heuristics, heuristics + 3);
-                for(int i = 0; i < 3; i++){
-                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
-                        nodes.push(child_1);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
-                        nodes.push(child_2);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_3->state)){
-                        nodes.push(child_3);
-                    }
-                }    
+                pushChildren(nodes, child_1, child_2, child_3, nullptr);
                 break;
             case 2: // Manhattan Distance Heuristic
                 break;
@@ -463,19 +384,7 @@ void expandQueue(queue<Node*>& nodes, int algorithmType){
                 nodes.push(child_2);
                 break;
             case 1: // Misplaced Tile Heuristic
-                //Node* best_node = nullptr;
-                int heuristics[2];
-                heuristics[0] = getMisplacedTiles(child_1->state);
-                heuristics[1] = getMisplacedTiles(child_2->state);
-                sort(heuristics, heuristics + 2);
-                for(int i = 0; i < 2; i++){
-                    if(heuristics[i] == getMisplacedTiles(child_1->state)){
-                        nodes.push(child_1);
-                    }
-                    else if(heuristics[i] == getMisplacedTiles(child_2->state)){
-                        nodes.push(child_2);
-                    }
-                }    
+                pushChildren(nodes, child_1, child_2, nullptr, nullptr);
                 break;
             case 2: // Manhattan Distance Heuristic
                 break;
@@ -519,8 +428,8 @@ int main(){
     int difficulty = -1;
     if(puzzle_mode == 1){ /////////////////////////////////////////////// CREATE DEFAULT PUZZLE
         cout << "You wish to use a default puzzle. "; 
-        while (difficulty < 0 || difficulty > 5){//checks for valid input
-            cout << "Please enter a desired difficulty on a scale from 0 to 5.\n";
+        while (difficulty < 0 || difficulty > 6){//checks for valid input
+            cout << "Please enter a desired difficulty on a scale from 0 to 6.\n";
             cin >> difficulty;
         }
         if (difficulty == 0){
@@ -543,7 +452,11 @@ int main(){
             cout << "Hard difficulty selected.\n";
             user_puzzle = hard_puzzle;
         }  
-        if(difficulty == 5){
+        if (difficulty == 5){
+            cout << "Very hard difficulty selected.\n";
+            user_puzzle = very_hard_puzzle;
+        }  
+        if(difficulty == 6){
             cout << "Impossible difficulty selected.\n";
             user_puzzle = impossible_puzzle;
         }
