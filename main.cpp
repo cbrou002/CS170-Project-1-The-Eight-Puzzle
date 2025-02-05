@@ -94,20 +94,12 @@ void pushChildren(queue<Node*>& nodes, Node* child_1, Node* child_2, Node* child
     int heuristic_3 = (child_3) ? getMisplacedTiles(child_3->state) : 1000;
     int heuristic_4 = (child_4) ? getMisplacedTiles(child_4->state) : 1000;
 
-    // Vector stores children with their heuristics
+    // Vector stores children along with their heuristics for easier comparison
     vector<pair<int, Node*>> children;
-    if (child_1){
-        children.push_back({heuristic_1, child_1});
-    }
-    if (child_2){
-        children.push_back({heuristic_2, child_2});
-    } 
-    if (child_3){
-        children.push_back({heuristic_3, child_3});
-    } 
-    if (child_4){
-        children.push_back({heuristic_4, child_4});
-    } 
+    if (child_1) children.push_back({heuristic_1, child_1});
+    if (child_2) children.push_back({heuristic_2, child_2});
+    if (child_3) children.push_back({heuristic_3, child_3});
+    if (child_4) children.push_back({heuristic_4, child_4});
 
     // Sort the children based on their heuristics (in ascending order)
     sort(children.begin(), children.end(), [](const pair<int, Node*>& a, const pair<int, Node*>& b) {
