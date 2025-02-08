@@ -311,11 +311,13 @@ int main(){
             cin >> temp;
             user_puzzle[0][i] = temp;
         }
+        cout << endl;
         cout << "Enter the second row (separated by spaces and use 0 to represent the blank space), then hit enter\n";
         for(int i = 0; i < 3; i++){
             cin >> temp;
             user_puzzle[1][i] = temp;
         }
+        cout << endl;
         cout << "Enter the third row (separated by spaces and use 0 to represent the blank space), then hit enter\n";
         for(int i = 0; i < 3; i++){
             cin >> temp;
